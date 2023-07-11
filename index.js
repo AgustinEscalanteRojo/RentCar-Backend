@@ -1,5 +1,6 @@
 import express, { request, response } from 'express';
 import bodyParser from 'body-parser'
+import authRouter from './src/router/task.js'
 
 const app = express();
 const port = 8080;
@@ -10,6 +11,8 @@ app.use(
     extended: true,
   })
 )
+
+app.use('/auth', authRouter)
 
 app.get('/', (request, response) => {
     response.json({info: 'hola mundo'})
