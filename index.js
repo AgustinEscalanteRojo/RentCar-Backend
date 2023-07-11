@@ -1,6 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import tasksRouter from './src/router/tasks.js'
+import authRouter from './src/router/auth.js'
 import connectToDb from './src/services/db.js'
 
 const startApp = async () => {
@@ -19,6 +20,7 @@ const startApp = async () => {
   })
 
   app.use('/tasks', tasksRouter)
+  app.use('/auth', authRouter)
 
   try {
     await connectToDb()
