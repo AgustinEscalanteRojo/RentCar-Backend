@@ -1,23 +1,34 @@
-import express, { request, response } from 'express';
+import express from 'express'
 import bodyParser from 'body-parser'
-import authRouter from './src/router/task.js'
+import tasksRouter from './src/router/tasks.js'
+import connectToDb from './src/services/db.js'
 
-const app = express();
-const port = 8080;
+const startApp = async () => {
+  const app = express()
+  const port = 8080
 
-app.use(bodyParser.json())
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
+  app.use(bodyParser.json())
+  app.use(
+    bodyParser.urlencoded({
+      extended: true,
+    })
+  )
+
+  app.get('/', (request, response) => {
+    response.json({ info: 'hola mundo' })
   })
-)
 
-app.use('/auth', authRouter)
+  app.use('/tasks', tasksRouter)
 
-app.get('/', (request, response) => {
-    response.json({info: 'hola mundo'})
-})
+  try {
+    await connectToDb()
+    app.listen(port, () => {
+        console.log(`Server start in ${port} port`)
+    })
+  } catch (e) {
+    console.log(e)
+    process.exit(1)
+  }
+}
 
-app.listen(port, () => {
-    console.log('Server start in ${port} port'); 
-})
+startApp()
