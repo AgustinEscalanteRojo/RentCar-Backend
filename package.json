@@ -10,8 +10,10 @@
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0"
   }
 }
