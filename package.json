@@ -1,0 +1,17 @@
+{
+  "name": "rentcar-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "repository": "https://github.com/AgustinEscalanteRojo/RentCar-Backend.git",
+  "author": "Agustin <agustinescalanterojo@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
