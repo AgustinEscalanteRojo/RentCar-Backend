@@ -3,6 +3,10 @@ import bodyParser from 'body-parser'
 import tasksRouter from './src/router/tasks.js'
 import authRouter from './src/router/auth.js'
 import connectToDb from './src/services/db.js'
+import dotenv from 'dotenv'
+import { ensureAuthenticated } from './src/middelware/auth.js'
+
+dotenv.config()
 
 const startApp = async () => {
   const app = express()
@@ -14,6 +18,8 @@ const startApp = async () => {
       extended: true,
     })
   )
+
+  app.use(ensureAuthenticated)
 
   app.get('/', (request, response) => {
     response.json({ info: 'hola mundo' })
