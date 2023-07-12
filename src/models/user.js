@@ -1,13 +1,29 @@
 import mongoose from 'mongoose'
 
-const userSchema = new mongoose.Schema(
-  {
-    email: {
+const userSchema = new mongoose.Schema({
+    _id: {
       type: String,
       require: true,
-      unique: true,
-      trim: true,
-      lowerCase: true,
+    },
+    firstName: { 
+      type: String, 
+      require: true, 
+    },
+    lastName: { 
+      type: String, 
+      require: true,
+    },
+    age: { 
+      type: Number,
+      require: true,
+    },
+    rol: {
+      type: String,
+      enum: ['Admin', 'Seller', 'Customer']
+    },
+    phone: {
+      type: Number, 
+      require: true,
     },
     password: {
       type: String,
@@ -16,6 +32,10 @@ const userSchema = new mongoose.Schema(
     salt: {
       type: String,
       required: true,
+    },
+    document: {
+      type: String,
+      require: true,
     },
   },
   { collection: 'users' }
