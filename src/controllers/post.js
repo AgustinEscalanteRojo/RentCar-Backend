@@ -32,6 +32,7 @@ export const createPost = async ({ name }) => {
   return post.save()
 }
 
+// verifica si un usuario tiene los permisos adecuados para actualizar un post
 /**
  * @param {string} id
  * @param {object} data
@@ -47,11 +48,18 @@ export const updatePost = async (id, data, user) => {
   return getPostById(id)
 }
 
+// vendedor como el administrador puedan borrar el post
 /**
  * @param {string} id
+ * @param {object} user
  * @return {boolean}
  */
-export const removePostById = async (id) => {
+export const deletePostById = async (id, user) => {
+  const post = await getPostById(id)
+  if (post.sellerId !== user._id && user.rol !== 'admin') {
+    throw new Error('No tienes permiso para borrar este post')
+  }
   await Post.deleteOne({ _id: id })
   return true
 }
+

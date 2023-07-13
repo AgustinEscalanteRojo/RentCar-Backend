@@ -1,0 +1,69 @@
+import express from 'express'
+import {
+  getPosts,
+  getPostById,
+  createPost,
+  updatePost,
+  deletePostById
+} from '../controllers/post.js'
+
+const router = express.Router()
+
+// Get all
+router.get('/', async (request, response) => {
+  try {
+    const post = await getPosts()
+    response.json({ post })
+  } catch {
+    response.status(500).json('Algo ha salido mal')
+  }
+})
+
+// Ruta para obtener por ID
+router.get('/:id', async (request, response) => {
+  try {
+    const post = await getPostById(request.params.id)
+    response.json({ post })
+  } catch (e) {
+    if (e.message === 'Post not found') {
+      response.status(404).json(e.message)
+    }
+    response.status(500).json('Algo ha salido mal')
+  }
+})
+
+// Ruta para crear
+router.post('/', async (request, response) => {
+  try {
+    const createdPost = await createPost(request.body)
+    response.json({ post: createdPost })
+  } catch (e) {
+    response.status(500).json(e.message)
+  }
+})
+
+// Ruta para actualizar por ID
+router.put('/:id', async (request, response) => {
+  try {
+    const updatedPost = await updatePost(
+      request.params.id,
+      request.body,
+      request.user
+    )
+    response.json({ from: 'server', post: updatedPost })
+  } catch (e) {
+    response.status(500).json(e.message)
+  }
+})
+
+// Ruta para eliminar por ID
+router.delete('/:id', (request, response) => {
+  try {
+  deletePostById(request.params.id)
+  response.json({ removed: true })
+  } catch (e) {
+    response.status(500).json(e.message)
+  }
+})
+
+export default router

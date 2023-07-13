@@ -24,7 +24,7 @@ router.post('/signup', async (request, response) => {
   }
 })
 
-// Ruta para la sincronización del rover
+// Ruta para la sincronización 
 // router.get('/syncRover', async (request, response) => {
 //   try {
 //     const result = await getRover() // Llama a la función getRover del servicio de rover para obtener los datos del rover
