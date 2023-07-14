@@ -30,6 +30,7 @@ export const signup = async ({ email, password }) => {
 
   // Crear un nuevo objeto User con el correo electrónico, contraseña hasheada y salt
   const user = new User({ email, password: hashedPassword, salt })
+  console.log(email, password)
   await user.save()
 
   // Generar y devolver un token JWT firmado con el correo electrónico del usuario
@@ -46,9 +47,9 @@ export const login = async ({ email, password }) => {
   if (!email || !password) {
     throw new Error('Miss some fields')
   }
+  console.log('login', email, password)
 
   // Comprobar si existe un usuario con el correo electrónico proporcionado
-  const hasUser = await User.findOne({ email })
   const user = await User.findOne({ email })
 
   if (!user) {

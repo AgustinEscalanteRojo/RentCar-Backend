@@ -24,11 +24,67 @@ export const getPosts = async () => {
 /**
  * @param {object} data
  * @param {string} data.name
+ * @param {"car", "moto", "van"} data.type
+ * @param {string} data.model
+ * @param {string} data.plateNumber
+ * @param {string} data.km
+ * @param {string} data.carSeat
+ * @param {"gas", "electric", "hybrid"} data.fuelType
+ * @param {"manual", "automatic"} data.gearBoxType
+ * @param {string} data.style
  * @return {*}
  */
-export const createPost = async ({ name }) => {
-  const post = new Post({ name })
+export const createPost = async ({
+  name,
+  type,
+  model,
+  plateNumber,
+  km,
+  carSeat,
+  fuelType,
+  gearBoxType,
+  style,
+}) => {
+  if (!name || !model || !plateNumber || !km || !carSeat) {
+    throw new Error('Missing required fields')
+  }
 
+  const existPost = await PostfinOne({ name, type, sellerId })
+  if (existPost) {
+    throw new Error('This post already exist')
+  }
+
+  const validPostType = ['car', 'moto', 'van']
+  if (!validPostType.includes(type)) {
+    throw new Error('This is not valid type')
+  }
+
+  const validFuelType = ['gas', 'electric', 'hybrid']
+  if (fuelType && !validFuelType.includes(fuelType)) {
+    throw new Error('Invalid fuel type')
+  }
+
+  const validGearBoxType = ['manual', 'automatic']
+  if (gearBoxType && !validGearBoxType.includes(gearBoxType)) {
+    throw new Error('Invalid gear box type')
+  }
+
+  const validStyle = ['4x4', 'minivan', 'sports']
+  if (validStyleType && !validStyle.includes(validStyleType)) {
+    throw new Error('Invalid style')
+  }
+
+  const post = new Post({
+    name,
+    type,
+    model,
+    plateNumber,
+    km,
+    carSeat,
+    fuelType,
+    gearBoxType,
+    style,
+  })
   return post.save()
 }
 
@@ -62,4 +118,3 @@ export const deletePostById = async (id, user) => {
   await Post.deleteOne({ _id: id })
   return true
 }
-

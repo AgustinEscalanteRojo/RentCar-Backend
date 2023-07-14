@@ -22,8 +22,8 @@ router.get('/', async (request, response) => {
 // Ruta para obtener por ID
 router.get('/:id', async (request, response) => {
   try {
-    const post = await getPostById(request.params.id)
-    response.json({ post })
+    const posts = await getPostById(request.params.id)
+    response.json({ posts })
   } catch (e) {
     if (e.message === 'Post not found') {
       response.status(404).json(e.message)

@@ -1,10 +1,6 @@
 import mongoose from 'mongoose'
 
 const PostSchema = new mongoose.Schema({
-  _id: {
-    type: String,
-    required: true,
-  },
   name: {
     type: String,
     required: true,
@@ -33,7 +29,7 @@ const PostSchema = new mongoose.Schema({
     type: String,
     enum: ['gas', 'electric', 'hybrid']
   },
-  gearboxType: {
+  gearBoxType: {
     type: String,
     enum: ['manual', 'automatic']
   },
@@ -41,6 +37,9 @@ const PostSchema = new mongoose.Schema({
     type: String,
     enum: ['4x4', 'minivan', 'sports']
   },
+  sellerId: {
+    type: String
+  }
 })
 
 const Post = mongoose.model('Posts', PostSchema)

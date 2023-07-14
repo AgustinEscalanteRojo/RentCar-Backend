@@ -1,10 +1,6 @@
 import mongoose from 'mongoose'
 
 const userSchema = new mongoose.Schema({
-    _id: {
-      type: String,
-      require: true,
-    },
     firstName: { 
       type: String, 
       require: true, 
@@ -12,6 +8,13 @@ const userSchema = new mongoose.Schema({
     lastName: { 
       type: String, 
       require: true,
+    },
+    email: { 
+      type: String,
+      require: true,
+      unique: true,
+      trim: true,
+      loweCase: true,
     },
     age: { 
       type: Number,

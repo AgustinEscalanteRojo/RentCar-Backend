@@ -1,17 +1,19 @@
 import express from 'express'
 import bodyParser from 'body-parser'
-import tasksRouter from './src/router/tasks.js'
+import postRouter from './src/router/post.js'
 import authRouter from './src/router/auth.js'
 import connectToDb from './src/services/db.js'
 import dotenv from 'dotenv'
 import { ensureAuthenticated } from './src/middelware/auth.js'
+import cors from 'cors'
 
 dotenv.config()
 
 const startApp = async () => {
   const app = express()
-  const port = 8080
+  const port = process.env.PORT 
 
+  app.use(cors())
   app.use(bodyParser.json())
   app.use(
     bodyParser.urlencoded({
@@ -25,7 +27,7 @@ const startApp = async () => {
     response.json({ info: 'hola mundo' })
   })
 
-  app.use('/tasks', tasksRouter)
+  app.use('/posts', postRouter)
   app.use('/auth', authRouter)
 
   try {
