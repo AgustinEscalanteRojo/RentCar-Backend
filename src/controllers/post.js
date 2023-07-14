@@ -32,6 +32,7 @@ export const getPosts = async () => {
  * @param {"gas", "electric", "hybrid"} data.fuelType
  * @param {"manual", "automatic"} data.gearBoxType
  * @param {string} data.style
+ * @param {string} data.sellerId
  * @return {*}
  */
 export const createPost = async ({
@@ -44,20 +45,21 @@ export const createPost = async ({
   fuelType,
   gearBoxType,
   style,
+  sellerId
 }) => {
   if (!name || !model || !plateNumber || !km || !carSeat) {
     throw new Error('Missing required fields')
   }
 
-  const existPost = await PostfinOne({ name, type, sellerId })
+  const existPost = await Post.findOne({ name, type, sellerId })
   if (existPost) {
     throw new Error('This post already exist')
   }
 
-  const validPostType = ['car', 'moto', 'van']
-  if (!validPostType.includes(type)) {
-    throw new Error('This is not valid type')
-  }
+  // const validPostType = ['car', 'moto', 'van']
+  // if (!validPostType.includes(type)) {
+  //   throw new Error('This is not valid type')
+  // }
 
   const validFuelType = ['gas', 'electric', 'hybrid']
   if (fuelType && !validFuelType.includes(fuelType)) {
@@ -70,7 +72,7 @@ export const createPost = async ({
   }
 
   const validStyle = ['4x4', 'minivan', 'sports']
-  if (validStyleType && !validStyle.includes(validStyleType)) {
+  if (style && !validStyle.includes(validStyle)) {
     throw new Error('Invalid style')
   }
 
@@ -84,6 +86,7 @@ export const createPost = async ({
     fuelType,
     gearBoxType,
     style,
+    sellerId
   })
   return post.save()
 }
