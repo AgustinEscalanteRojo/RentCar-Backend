@@ -2,7 +2,7 @@ import Post from '../models/post.js'
 
 /**
  * @param {string} id
- * @return {{name: string, id: string}}
+ * @return {Promise<object>}
  */
 export const getPostById = async (id) => {
   const post = await Post.findOne({ _id: id })
@@ -47,7 +47,7 @@ export const createPost = async ({
   style,
   sellerId
 }) => {
-  if (!name || !model || !plateNumber || !km || !carSeat) {
+  if (!name || !model || !plateNumber || !km || !carSeat || !sellerId) {
     throw new Error('Missing required fields')
   }
 
@@ -95,7 +95,8 @@ export const createPost = async ({
 /**
  * @param {string} id
  * @param {object} data
- * @return {*&{id}}
+ * @param {object} user
+ * @return {Promise<object>}
  */
 export const updatePost = async (id, data, user) => {
   const post = await getPostById(id)
@@ -111,11 +112,12 @@ export const updatePost = async (id, data, user) => {
 /**
  * @param {string} id
  * @param {object} user
- * @return {boolean}
+ * @return {Promise<boolean>}
  */
 export const deletePostById = async (id, user) => {
   const post = await getPostById(id)
-  if (post.sellerId !== user._id && user.rol !== 'admin') {
+  console.log({userId: user._id, sellerId: post.sellerId})
+  if (post.sellerId.toString() !== user._id.toString() && user.rol !== 'admin') {
     throw new Error('No tienes permiso para borrar este post')
   }
   await Post.deleteOne({ _id: id })

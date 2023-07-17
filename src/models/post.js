@@ -38,7 +38,9 @@ const PostSchema = new mongoose.Schema({
     enum: ['4x4', 'minivan', 'sports']
   },
   sellerId: {
-    type: String
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   }
 })
 

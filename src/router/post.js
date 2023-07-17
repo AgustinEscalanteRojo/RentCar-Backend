@@ -4,7 +4,7 @@ import {
   getPostById,
   createPost,
   updatePost,
-  deletePostById
+  deletePostById,
 } from '../controllers/post.js'
 
 const router = express.Router()
@@ -35,7 +35,7 @@ router.get('/:id', async (request, response) => {
 // Ruta para crear
 router.post('/', async (request, response) => {
   try {
-    const createdPost = await createPost(request.body)
+    const createdPost = await createPost({...request.body, sellerId:request.user._id})
     response.json({ post: createdPost })
   } catch (e) {
     response.status(500).json(e.message)
@@ -57,10 +57,10 @@ router.put('/:id', async (request, response) => {
 })
 
 // Ruta para eliminar por ID
-router.delete('/:id', (request, response) => {
+router.delete('/:id', async (request, response) => {
   try {
-  deletePostById(request.params.id)
-  response.json({ removed: true })
+    await deletePostById(request.params.id, request.user)
+    response.json({ removed: true })
   } catch (e) {
     response.status(500).json(e.message)
   }
