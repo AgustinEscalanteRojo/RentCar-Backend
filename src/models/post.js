@@ -23,7 +23,6 @@ const PostSchema = new mongoose.Schema({
   },
   carSeat: {
     type: Number,
-    required: true,
   },
   fuelType: {
     type: String,

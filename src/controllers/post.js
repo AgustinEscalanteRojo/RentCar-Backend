@@ -1,8 +1,9 @@
 import Post from '../models/post.js'
+import UserPostComment from '../models/user_post_comment.js'
 
 /**
  * @param {string} id
- * @return {Promise<object>}
+ * @returns {Promise<object>}
  */
 export const getPostById = async (id) => {
   const post = await Post.findOne({ _id: id })
@@ -11,11 +12,15 @@ export const getPostById = async (id) => {
     throw new Error('Post not found')
   }
 
-  return post
+  const postComments = await UserPostComment.find({
+    postId: post._id,
+  })
+
+  return { ...post.toObject(), comment: postComments }
 }
 
 /**
- * @return {[{name: string},{name: string},{name: string}]}
+ * @returns {Promise<object>}
  */
 export const getPosts = async () => {
   return Post.find()
@@ -33,7 +38,6 @@ export const getPosts = async () => {
  * @param {"manual", "automatic"} data.gearBoxType
  * @param {string} data.style
  * @param {string} data.sellerId
- * @return {*}
  */
 export const createPost = async ({
   name,
@@ -45,9 +49,9 @@ export const createPost = async ({
   fuelType,
   gearBoxType,
   style,
-  sellerId
+  sellerId,
 }) => {
-  if (!name || !model || !plateNumber || !km || !carSeat || !sellerId) {
+  if (!name || !model || !plateNumber || !km || !sellerId) {
     throw new Error('Missing required fields')
   }
 
@@ -56,10 +60,10 @@ export const createPost = async ({
     throw new Error('This post already exist')
   }
 
-  // const validPostType = ['car', 'moto', 'van']
-  // if (!validPostType.includes(type)) {
-  //   throw new Error('This is not valid type')
-  // }
+  const validPostType = ['car', 'moto', 'van']
+  if (!validPostType.includes(type)) {
+    throw new Error('This is not valid type')
+  }
 
   const validFuelType = ['gas', 'electric', 'hybrid']
   if (fuelType && !validFuelType.includes(fuelType)) {
@@ -86,7 +90,7 @@ export const createPost = async ({
     fuelType,
     gearBoxType,
     style,
-    sellerId
+    sellerId,
   })
   return post.save()
 }
@@ -100,26 +104,44 @@ export const createPost = async ({
  */
 export const updatePost = async (id, data, user) => {
   const post = await getPostById(id)
-  if (post.sellerId !== user._id && user.rol !== 'admin') {
-    throw new Error('este no es tu post')
+
+  if (
+    post.sellerId.toString() !== user._id.toString() &&
+    user.rol !== 'admin'
+  ) {
+    throw new Error('This post can only be edited by its author')
   }
+
   await Post.findOneAndUpdate({ _id: id }, data)
 
   return getPostById(id)
+
+  // await post.save()
+
+  // return post
+
 }
 
 // vendedor como el administrador puedan borrar el post
 /**
  * @param {string} id
+ * @param {string} sellerId
  * @param {object} user
- * @return {Promise<boolean>}
+ * @param {string} user._id
+ * @param {'admin' | 'seller' | 'customer'} user.rol
+ * @returns {Promise<boolean>}
  */
 export const deletePostById = async (id, user) => {
   const post = await getPostById(id)
-  console.log({userId: user._id, sellerId: post.sellerId})
-  if (post.sellerId.toString() !== user._id.toString() && user.rol !== 'admin') {
-    throw new Error('No tienes permiso para borrar este post')
+
+  if (
+    post.sellerId.toString() !== user._id.toString() &&
+    user.rol !== 'admin'
+  ) {
+    throw new Error('You do not have permission to delete this post')
   }
+
   await Post.deleteOne({ _id: id })
+
   return true
 }
