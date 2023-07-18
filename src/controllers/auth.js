@@ -1,18 +1,26 @@
 import User from '../models/user.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { isValid } from 'date-fns'
 
 /**
  * @param {string} email
  * @param {string} password
+ * @param {string} dateOfBirth
+ * @param {'seller' | 'customer'} rol
  * @return {Promise<string>}
  * @return {salt.Promise}
  */
 
 const saltRounds = 10
 
-export const signup = async ({ email, password }) => {
-  if (!email || !password) {
+export const signup = async ({ 
+  email, 
+  password,
+  dateOfBirth,
+  rol,
+}) => {
+  if (!email || !password || !rol) {
     throw new Error('Miss some fields')
   }
 
@@ -22,6 +30,10 @@ export const signup = async ({ email, password }) => {
     throw new Error('Email is used')
   }
 
+  if (dateOfBirth && !isValid(dateOfBirth)) {
+    throw new Error('Your birthdate is invalid')
+  }
+
   // Generar un salt (valor aleatorio) para el hash de la contraseña
   const salt = await bcrypt.genSalt(saltRounds)
 
@@ -29,8 +41,13 @@ export const signup = async ({ email, password }) => {
   const hashedPassword = await bcrypt.hash(password, salt)
 
   // Crear un nuevo objeto User con el correo electrónico, contraseña hasheada y salt
-  const user = new User({ email, password: hashedPassword, salt })
-  console.log(email, password)
+  const user = new User({ 
+    email, 
+    password: hashedPassword, 
+    dateOfBirth,
+    salt 
+  })
+
   await user.save()
 
   // Generar y devolver un token JWT firmado con el correo electrónico del usuario
@@ -47,7 +64,6 @@ export const login = async ({ email, password }) => {
   if (!email || !password) {
     throw new Error('Miss some fields')
   }
-  console.log('login', email, password)
 
   // Comprobar si existe un usuario con el correo electrónico proporcionado
   const user = await User.findOne({ email })
