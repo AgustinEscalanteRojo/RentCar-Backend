@@ -3,7 +3,6 @@ import {
   getUsers,
   getUserById,
   removeUserById,
-  togglePostFavByUser,
 } from '../controllers/user.js'
 
 const router = express.Router()
