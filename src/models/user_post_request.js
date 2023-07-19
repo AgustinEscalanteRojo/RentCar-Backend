@@ -18,7 +18,7 @@ const UserPostRequestSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      require: true,
+      required: true,
       default: Date.now,
     },
   },

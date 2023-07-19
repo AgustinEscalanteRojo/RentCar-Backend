@@ -4,22 +4,21 @@ const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
-      require: true,
+      required: true,
     },
     lastName: {
-      type: String,
-      require: true,
+      required: true,
     },
     email: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
       trim: true,
       loweCase: true,
     },
     age: {
       type: Number,
-      require: true,
+      required: true,
     },
     rol: {
       type: String,
@@ -27,19 +26,19 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: Number,
-      require: true,
+      required: true,
     },
     password: {
       type: String,
-      require: true,
+      required: true,
     },
     salt: {
       type: String,
-      require: true,
+      required: true,
     },
     document: {
       type: String,
-      require: true,
+      required: true,
     },
     favPosts: [
       {

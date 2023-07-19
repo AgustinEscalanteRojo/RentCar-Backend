@@ -15,7 +15,7 @@ router.get('/', async (request, response) => {
     const post = await getPosts()
     response.json({ post })
   } catch {
-    response.status(500).json('Algo ha salido mal')
+    response.status(500).json('Something has gone wrong')
   }
 })
 
@@ -28,7 +28,7 @@ router.get('/:id', async (request, response) => {
     if (e.message === 'Post not found') {
       response.status(404).json(e.message)
     }
-    response.status(500).json('Algo ha salido mal')
+    response.status(500).json('Something has gone wrong')
   }
 })
 

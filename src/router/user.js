@@ -28,10 +28,27 @@ router.get('/users/:id', async (request, response) => {
   }
 })
 
+// ruta para borrar por Id 
+
 router.delete('/users/:id', async (request, response) => {
   try {
     await removeUserById(request.params.id)
     response.json({ removed: true })
+  } catch (error) {
+    response.status(500).json(error.message)
+  }
+})
+
+// ruta para valoraciones 
+
+router.post('/valorations/:postId', async (request, response) => {
+  try {
+    await addRatingToPostByUser({
+      postId: request.params.postId,
+      user: request.user,
+      data: request.body,
+    })
+    response.json(true)
   } catch (error) {
     response.status(500).json(error.message)
   }

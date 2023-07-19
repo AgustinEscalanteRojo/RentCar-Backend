@@ -80,12 +80,12 @@ export const togglePostFavByUser = async (postId, user) => {
 
 export const createPostCommentByUser = async ({ postId, data, user }) => {
   if (!data.comment) {
-    throw new Error('Missing comment')
+    throw new Error('Missing require field')
   }
 
   const post = await getPostById(postId)
   const postComment = new UserPostComment({
-    postId,
+    postId: post._id,
     customerId: user._id,
     comment: data.comment,
   })
@@ -103,10 +103,13 @@ export const createPostCommentByUser = async ({ postId, data, user }) => {
  */
 
 export const deletePostCommentByUser = async ({ commentId, user }) => {
-  const comment = await UserPostComment.findOne({ _id: commentId })
+  const postcomment = await UserPostComment.findOne({ _id: commentId })
+  if (!postcomment) {
+    throw new Error('Missing require field')
+  }
 
   if (
-    comment.customerId.toString() !== user._id.toString() &&
+    postcomment.customerId.toString() !== user._id.toString() &&
     user.rol !== 'admin'
   ) {
     throw new Error(
@@ -120,4 +123,41 @@ export const deletePostCommentByUser = async ({ commentId, user }) => {
   })
 
   return true
+}
+
+// añadir ratio 
+
+/**
+ * @param {string} postId
+ * @param {object} data
+ * @param {string} data.rate
+ * @param {object} user
+ * @param {string} user._id
+ * @returns {Promise<void>}
+ */
+
+export const addRatingToPostByUser = async ({postId, data, user}) => {
+  if(!data.rate) {
+    throw new Error ("missin require field ")
+  }
+
+  const formattedRate = Number(data.rate)
+  if (isNan (formattedRate))  {
+    throw new Error ("invalid field")
+  }
+
+  if(formattedRate < 0 || formattedRate > 5) {
+    throw new Error ('invalid range')
+  }
+
+  const post = await getPostById(postId)
+
+  const postRating = new UserPostValoration({
+    customerId: user._id,
+    postId: post._id,
+    rate: formattedRate,
+  })
+
+  await postRating.save()
+
 }

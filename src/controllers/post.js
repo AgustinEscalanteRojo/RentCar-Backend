@@ -12,11 +12,19 @@ export const getPostById = async (id) => {
     throw new Error('Post not found')
   }
 
+  const postValorations = await UserPostValorations.find({
+    postId: post._id,
+  })
+
+  const rating = postValorations.reduce((accumulator, current) => {
+    return accumulator + current.rate
+  }, 0)
+
   const postComments = await UserPostComment.find({
     postId: post._id,
   })
 
-  return { ...post.toObject(), comment: postComments }
+  return { ...post.toObject(), comment: postComments, rating: rating / 5 }
 }
 
 /**
@@ -102,7 +110,7 @@ export const createPost = async ({
  * @param {object} user
  * @return {Promise<object>}
  */
-export const updatePost = async (id, data, user) => {
+export const updatePost = async ({id, data, user}) => {
   const post = await getPostById(id)
 
   if (
@@ -112,27 +120,22 @@ export const updatePost = async (id, data, user) => {
     throw new Error('This post can only be edited by its author')
   }
 
-  await Post.findOneAndUpdate({ _id: id }, data)
+  await post.save()
 
-  return getPostById(id)
-
-  // await post.save()
-
-  // return post
-
+  return post
 }
 
 // vendedor como el administrador puedan borrar el post
 /**
- * @param {string} id
+ * @param {string} postId
  * @param {string} sellerId
  * @param {object} user
  * @param {string} user._id
  * @param {'admin' | 'seller' | 'customer'} user.rol
  * @returns {Promise<boolean>}
  */
-export const deletePostById = async (id, user) => {
-  const post = await getPostById(id)
+export const deletePostById = async (postId, user) => {
+  const post = await getPostById(postId)
 
   if (
     post.sellerId.toString() !== user._id.toString() &&
@@ -145,3 +148,5 @@ export const deletePostById = async (id, user) => {
 
   return true
 }
+
+
