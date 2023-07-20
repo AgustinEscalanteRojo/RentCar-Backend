@@ -7,7 +7,7 @@ import {
 
 const router = express.Router()
 
-router.get('/users', async (request, response) => {
+router.get('/', async (request, response) => {
   try {
     const users = await getUsers(request.user)
     response.json({ users })
@@ -16,7 +16,7 @@ router.get('/users', async (request, response) => {
   }
 })
 
-router.get('/users/:id', async (request, response) => {
+router.get('/:id', async (request, response) => {
   try {
     const user = await getUserById(request.params.id)
     response.json({ user })
@@ -30,7 +30,7 @@ router.get('/users/:id', async (request, response) => {
 
 // ruta para borrar por Id 
 
-router.delete('/users/:id', async (request, response) => {
+router.delete('/:id', async (request, response) => {
   try {
     await removeUserById(request.params.id)
     response.json({ removed: true })

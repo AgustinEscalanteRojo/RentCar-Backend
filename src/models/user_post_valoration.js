@@ -27,9 +27,9 @@ const UserPostValorationSchema = new mongoose.Schema(
   { collection: 'userPostValorations' }
 )
 
-const UserPostValidation = mongoose.model(
+const UserPostValoration = mongoose.model(
   'UserPostValorations',
   UserPostValorationSchema
 )
 
-export default UserPostValidation
+export default UserPostValoration

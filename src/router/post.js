@@ -26,7 +26,7 @@ router.get('/:id', async (request, response) => {
     response.json({ posts })
   } catch (e) {
     if (e.message === 'Post not found') {
-      response.status(404).json(e.message)
+      response.status(404).json(error.message)
     }
     response.status(500).json('Something has gone wrong')
   }
@@ -38,7 +38,7 @@ router.post('/', async (request, response) => {
     const createdPost = await createPost({...request.body, sellerId:request.user._id})
     response.json({ post: createdPost })
   } catch (e) {
-    response.status(500).json(e.message)
+    response.status(500).json(error.message)
   }
 })
 
@@ -52,7 +52,7 @@ router.put('/:id', async (request, response) => {
     )
     response.json({ from: 'server', post: updatedPost })
   } catch (e) {
-    response.status(500).json(e.message)
+    response.status(500).json(error.message)
   }
 })
 
@@ -62,7 +62,7 @@ router.delete('/:id', async (request, response) => {
     await deletePostById(request.params.id, request.user)
     response.json({ removed: true })
   } catch (e) {
-    response.status(500).json(e.message)
+    response.status(500).json(error.message)
   }
 })
 

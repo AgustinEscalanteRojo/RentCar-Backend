@@ -34,6 +34,11 @@ export const signup = async ({
     throw new Error('Your birthdate is invalid')
   }
 
+  const validRoles = ['seller', 'customer']
+  if (rol && !validRoles.includes(rol)) {
+    throw new Error(`Your role must be one of the following: ${validRoles}`)
+  }
+
   // Generar un salt (valor aleatorio) para el hash de la contraseña
   const salt = await bcrypt.genSalt(saltRounds)
 
@@ -76,7 +81,7 @@ export const login = async ({ email, password }) => {
   const matchedPassword = await bcrypt.compare(password, user.password)
 
   if (!matchedPassword) {
-    throw new Error('invalid password')
+    throw new Error('Invalid password')
   }
 
   // Generar y devolver un token JWT firmado con el correo electrónico y ID del usuario

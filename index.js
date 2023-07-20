@@ -2,9 +2,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import postRouter from './src/router/post.js'
 import authRouter from './src/router/auth.js'
-import adminRouter from './src/router/user.js'
-import commentsRouter from './src/router/comments.js'
-import favsRouter from './src/router/favs.js'
+import userRouter from './src/router/user.js'
 import connectToDb from './src/services/db.js'
 import dotenv from 'dotenv'
 import { ensureAuthenticated } from './src/middelware/auth.js'
@@ -26,11 +24,9 @@ const startApp = async () => {
 
   app.use(ensureAuthenticated)
 
-  app.use('/posts', postRouter)
   app.use('/auth', authRouter)
-  app.use('/admin', adminRouter)
-  app.use('/comments', commentsRouter)
-  app.use('/toggle', favsRouter)
+  app.use('/post', postRouter)
+  app.use('/user', userRouter)
 
   try {
     await connectToDb()
