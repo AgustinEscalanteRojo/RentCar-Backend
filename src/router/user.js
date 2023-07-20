@@ -39,19 +39,4 @@ router.delete('/:id', async (request, response) => {
   }
 })
 
-// ruta para valoraciones 
-
-router.post('/valorations/:postId', async (request, response) => {
-  try {
-    await addRatingToPostByUser({
-      postId: request.params.postId,
-      user: request.user,
-      data: request.body,
-    })
-    response.json(true)
-  } catch (error) {
-    response.status(500).json(error.message)
-  }
-})
-
 export default router

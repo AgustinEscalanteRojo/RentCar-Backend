@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken'
 import User from '../models/user.js'
 
 const publicUrls = ['/auth/login', '/auth/signup']
-const adminUrls = ['/admin/users']
 
 /**
  * Middleware para asegurar la autenticación del usuario.
@@ -45,10 +44,6 @@ export const ensureAuthenticated = async (request, response, next) => {
   // Comprobar si no se encuentra al usuario en la base de datos.
   if (!user) {
     return response.status(403).send({ message: 'Wrong token' })
-  }
-
-  if (adminUrls.includes(request.path) && user.rol !== 'admin') {
-    return response.status(404).send({ message: 'Not found' })
   }
 
   // Agregar el usuario a la solicitud para que esté disponible en los controladores posteriores.
