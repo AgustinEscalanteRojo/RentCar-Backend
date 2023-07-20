@@ -1,4 +1,5 @@
 import Post from '../models/post.js'
+import User from '../models/user.js'
 import UserPostComment from '../models/user_post_comment.js'
 import UserPostRequest from '../models/user_post_request.js'
 import UserPostValoration from '../models/user_post_valoration.js'
@@ -15,7 +16,7 @@ export const getPostById = async (id) => {
     throw new Error('Post not found')
   }
 
-  const postValorations = await UserPostValorations.find({
+  const postValorations = await UserPostValoration.find({
     postId: post._id,
   })
 
@@ -40,7 +41,7 @@ export const getPostById = async (id) => {
 }
 
 /**
- * @returns {Promise<object>}
+ * @returns {Promise<object[]>}
  */
 export const getPosts = async () => {
   return Post.find()
@@ -149,6 +150,10 @@ export const createPost = async ({
   })
   return post.save()
 }
+
+
+// CONTINUAR MAÑANA POR AQUI 
+
 
 // verifica si un usuario tiene los permisos adecuados para actualizar un post
 /**

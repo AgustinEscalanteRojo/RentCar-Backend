@@ -2,13 +2,6 @@ import mongoose from 'mongoose'
 
 const userSchema = new mongoose.Schema(
   {
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
-      required: true,
-    },
     email: {
       type: String,
       required: true,
@@ -16,8 +9,20 @@ const userSchema = new mongoose.Schema(
       trim: true,
       loweCase: true,
     },
-    age: {
-      type: Number,
+    password: {
+      type: String,
+      required: true,
+    },
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      required: true,
+    },
+
+    dateOfBirth: {
+      type: Date,
       required: true,
     },
     rol: {
@@ -26,10 +31,6 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: Number,
-      required: true,
-    },
-    password: {
-      type: String,
       required: true,
     },
     salt: {

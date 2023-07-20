@@ -6,18 +6,24 @@ import { isValid } from 'date-fns'
 /**
  * @param {string} email
  * @param {string} password
+ * @param {string} firstName
+ * @param {string} lastName
  * @param {string} dateOfBirth
+ * @param {number} phone
+ * @param {string} document
  * @param {'seller' | 'customer'} rol
- * @return {Promise<string>}
  * @return {salt.Promise}
+ * @return {Promise<string>}
  */
 
-const saltRounds = 10
-
-export const signup = async ({ 
-  email, 
+export const signup = async ({
+  email,
   password,
+  firstName,
+  lastName,
   dateOfBirth,
+  phone,
+  document,
   rol,
 }) => {
   if (!email || !password || !rol) {
@@ -30,14 +36,32 @@ export const signup = async ({
     throw new Error('Email is used')
   }
 
+  if (firstName && firstName.length < 3) {
+    throw new Error('First name must be 3 characters or longer')
+  }
+
+  if (lastName && lastName.length < 3) {
+    throw new Error('Last name must be 3 characters or longer')
+  }
+
   if (dateOfBirth && !isValid(dateOfBirth)) {
     throw new Error('Your birthdate is invalid')
+  }
+
+  if (phone && typeof phone !== 'number') {
+    throw new Error('Phone must only contain numbers')
+  }
+
+  if (document && typeof document !== 'string') {
+    throw new Error('Document must be composed of numbers and letters')
   }
 
   const validRoles = ['seller', 'customer']
   if (rol && !validRoles.includes(rol)) {
     throw new Error(`Your role must be one of the following: ${validRoles}`)
   }
+
+  const saltRounds = 10
 
   // Generar un salt (valor aleatorio) para el hash de la contraseña
   const salt = await bcrypt.genSalt(saltRounds)
@@ -46,11 +70,15 @@ export const signup = async ({
   const hashedPassword = await bcrypt.hash(password, salt)
 
   // Crear un nuevo objeto User con el correo electrónico, contraseña hasheada y salt
-  const user = new User({ 
-    email, 
-    password: hashedPassword, 
+  const user = new User({
+    email,
+    password: hashedPassword,
+    firstName,
+    lastName,
     dateOfBirth,
-    salt 
+    phone,
+    document,
+    rol,
   })
 
   await user.save()
