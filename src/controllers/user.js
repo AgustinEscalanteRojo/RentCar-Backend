@@ -33,7 +33,7 @@ export const getUserById = async (id) => {
  * @param {'admin' | 'seller' | 'customer'} user.rol
  * @returns {Promise<boolean>}
  */
-export const deleteUserById = async (id, user) => {
+export const removeUserById = async (id, user) => {
   if (!user || user.rol !== 'admin') {
     throw new Error('You dont have permission')
   }

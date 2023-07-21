@@ -70,7 +70,7 @@ const PostSchema = new mongoose.Schema({
   },
   availableTime: {
     type: [PostAvailableTimeSchema],
-    require: true,
+    required: true,
   },
 })
 

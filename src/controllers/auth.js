@@ -12,7 +12,6 @@ import { isValid } from 'date-fns'
  * @param {number} phone
  * @param {string} document
  * @param {'seller' | 'customer'} rol
- * @return {salt.Promise}
  * @return {Promise<string>}
  */
 
@@ -84,7 +83,7 @@ export const signup = async ({
   await user.save()
 
   // Generar y devolver un token JWT firmado con el correo electrónico del usuario
-  return jwt.sign({ email: user.email }, process.env.TOKEN_SECRET)
+  return jwt.sign({ email, id: user._id }, process.env.TOKEN_SECRET)
 }
 
 /**

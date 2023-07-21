@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     lastName: {
+      type: String,
       required: true,
     },
 
@@ -28,6 +29,7 @@ const userSchema = new mongoose.Schema(
     rol: {
       type: String,
       enum: ['Admin', 'Seller', 'Customer'],
+      required: true,
     },
     phone: {
       type: Number,

@@ -1,8 +1,8 @@
 import Post from '../models/post.js'
 import User from '../models/user.js'
-import UserPostComment from '../models/user_post_comment.js'
-import UserPostRequest from '../models/user_post_request.js'
-import UserPostValoration from '../models/user_post_valoration.js'
+import UserPostComment from '../models/userPostComment.js'
+import UserPostRequest from '../models/userPostRequest.js'
+import UserPostValoration from '../models/userPostValoration.js'
 import { isValid } from 'date-fns'
 
 /**
@@ -150,8 +150,6 @@ export const createPost = async ({
   })
   return post.save()
 }
-
-// CONTINUAR MAÑANA POR AQUI
 
 // verifica si un usuario tiene los permisos adecuados para actualizar un post
 /**
