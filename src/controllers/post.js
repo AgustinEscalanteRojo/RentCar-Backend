@@ -151,9 +151,7 @@ export const createPost = async ({
   return post.save()
 }
 
-
-// CONTINUAR MAÑANA POR AQUI 
-
+// CONTINUAR MAÑANA POR AQUI
 
 // verifica si un usuario tiene los permisos adecuados para actualizar un post
 /**
@@ -167,7 +165,20 @@ export const createPost = async ({
  * @param {Date} data.availableTime.timing.end
  * @return {Promise<object>}
  */
-export const updatePost = async ({ id, user }) => {
+export const updatePost = async ({ id, data, user }) => {
+  const {
+    name,
+    type,
+    model,
+    plateNumber,
+    km,
+    carSeat,
+    fuelType,
+    gearBoxType,
+    style,
+    availableTime,
+  } = data
+
   const post = await getPostById(id)
 
   if (
@@ -175,6 +186,62 @@ export const updatePost = async ({ id, user }) => {
     user.rol !== 'admin'
   ) {
     throw new Error('This post can only be edited by its author')
+  }
+
+  if (name) {
+    post.name = name
+  }
+
+  if (model) {
+    post.model = model
+  }
+
+  if (plateNumber) {
+    post.plateNumber = plateNumber
+  }
+
+  if (km) {
+    post.km = km
+  }
+
+  if (carSeat) {
+    post.carSeat = carSeat
+  }
+
+  const validPostType = ['car', 'moto', 'van']
+  if (type) {
+    if (!validPostType.includes(type)) {
+      throw new Error('This is not valid type ')
+    } else {
+      post.type = type
+    }
+  }
+
+  const validFuelType = ['gas', 'electric', 'hybrid']
+  if (fuelType) {
+    if (fuelType && !validFuelType.includes(fuelType)) {
+      throw new Error('invalid fuel type')
+    } else {
+      post.fuelType = fuelType
+    }
+  }
+
+  const validGearBoxType = ['manual', 'automatic']
+  if (gearBoxType) {
+    if (gearBoxType && !validGearBoxType.includes(gearBoxType)) {
+      throw new Error('invalid gear box type')
+    } else {
+      post.gearBoxType = gearBoxType
+    }
+  }
+
+  const validStyle = ['4x4', 'minivan', 'sports']
+  if (style) {
+    if (style && !validStyle.includes(style)) {
+      throw new Error('invalid style')
+    } else {
+      post.style = style
+    }
   }
 
   await post.save()
@@ -291,7 +358,7 @@ export const deletePostCommentByUser = async ({ commentId, user }) => {
   return true
 }
 
-// añadir ratio 
+// añadir ratio
 
 /**
  * @param {string} postId
@@ -302,18 +369,18 @@ export const deletePostCommentByUser = async ({ commentId, user }) => {
  * @returns {Promise<void>}
  */
 
-export const addRatingToPostByUser = async ({postId, data, user}) => {
-  if(!data.rate) {
-    throw new Error ("missin require field ")
+export const addRatingToPostByUser = async ({ postId, data, user }) => {
+  if (!data.rate) {
+    throw new Error('missin require field ')
   }
 
   const formattedRate = Number(data.rate)
-  if (isNan (formattedRate))  {
-    throw new Error ("invalid field")
+  if (isNan(formattedRate)) {
+    throw new Error('invalid field')
   }
 
-  if(formattedRate < 0 || formattedRate > 5) {
-    throw new Error ('invalid range')
+  if (formattedRate < 0 || formattedRate > 5) {
+    throw new Error('invalid range')
   }
 
   const post = await getPostById(postId)
@@ -325,7 +392,6 @@ export const addRatingToPostByUser = async ({postId, data, user}) => {
   })
 
   await postRating.save()
-
 }
 
 // Add request & update request
