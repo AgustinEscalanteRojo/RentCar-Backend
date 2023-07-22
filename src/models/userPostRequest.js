@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { PostAvailableTimeSchema } from './posts.js'
 
 const UserPostRequestSchema = new mongoose.Schema(
   {
@@ -15,6 +16,9 @@ const UserPostRequestSchema = new mongoose.Schema(
     status: {
       type: String,
       default: 'pending',
+    },
+    time: {
+      type: PostAvailableTimeSchema,
     },
     createdAt: {
       type: Date,

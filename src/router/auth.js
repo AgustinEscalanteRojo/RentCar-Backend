@@ -9,7 +9,7 @@ router.post('/login', async (request, response) => {
     const token = await login(request.body) // Llama a la función login del controlador de autenticación
     response.json(token)
   } catch (e) {
-    response.status(500).json(error.message)
+    response.status(500).json(e.message)
   }
 })
 
@@ -19,7 +19,7 @@ router.post('/signup', async (request, response) => {
     const token = await signup(request.body) // Llama a la función signup del controlador de autenticación
     response.json(token)
   } catch (e) {
-    response.status(500).json(error.message)
+    response.status(500).json(e.message)
   }
 })
 

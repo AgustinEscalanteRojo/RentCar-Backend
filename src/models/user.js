@@ -15,16 +15,13 @@ const userSchema = new mongoose.Schema(
     },
     firstName: {
       type: String,
-      required: true,
     },
     lastName: {
       type: String,
-      required: true,
     },
 
     dateOfBirth: {
       type: Date,
-      required: true,
     },
     rol: {
       type: String,
@@ -33,15 +30,12 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: Number,
-      required: true,
     },
     salt: {
       type: String,
-      required: true,
     },
     document: {
       type: String,
-      required: true,
     },
     favPosts: [
       {

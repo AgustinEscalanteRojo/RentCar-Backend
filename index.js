@@ -25,7 +25,7 @@ const startApp = async () => {
   app.use(ensureAuthenticated)
 
   app.use('/auth', authRouter)
-  app.use('/post', postRouter)
+  app.use('/posts', postRouter)
   app.use('/user', userRouter)
 
   try {

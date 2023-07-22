@@ -55,7 +55,7 @@ export const signup = async ({
     throw new Error('Document must be composed of numbers and letters')
   }
 
-  const validRoles = ['seller', 'customer']
+  const validRoles = ['Seller', 'Customer']
   if (rol && !validRoles.includes(rol)) {
     throw new Error(`Your role must be one of the following: ${validRoles}`)
   }
@@ -78,6 +78,7 @@ export const signup = async ({
     phone,
     document,
     rol,
+    salt,
   })
 
   await user.save()

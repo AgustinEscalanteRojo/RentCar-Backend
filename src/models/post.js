@@ -1,20 +1,22 @@
 import mongoose from 'mongoose'
 
 const PostAvailableTimeSchema = new mongoose.Schema({
-  weekDay: {
-    type: String,
-    enum: [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ],
-  },
+  weekDays: [
+    {
+      type: String,
+      enum: [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ],
+    },
+  ],
 
-  timing: [
+  times: [
     {
       start: Date,
       end: Date,
@@ -29,7 +31,7 @@ const PostSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['car', 'moto', 'van']
+    enum: ['car', 'moto', 'van'],
   },
   model: {
     type: String,
@@ -48,19 +50,19 @@ const PostSchema = new mongoose.Schema({
   },
   fuelType: {
     type: String,
-    enum: ['gas', 'electric', 'hybrid']
+    enum: ['gas', 'electric', 'hybrid'],
   },
   gearBoxType: {
     type: String,
-    enum: ['manual', 'automatic']
+    enum: ['manual', 'automatic'],
   },
   style: {
     type: String,
-    enum: ['4x4', 'minivan', 'sports']
+    enum: ['4x4', 'minivan', 'sports'],
   },
   sellerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
   createdAt: {
@@ -68,11 +70,12 @@ const PostSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
-  availableTime: {
+  availableTimes: {
     type: [PostAvailableTimeSchema],
-    required: true,
   },
-})
+},
+  { collection: 'posts'}
+)
 
 const Post = mongoose.model('Posts', PostSchema)
 

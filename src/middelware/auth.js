@@ -7,7 +7,7 @@ const publicUrls = ['/auth/login', '/auth/signup']
 //  * Middleware para asegurar la autenticación del usuario.
 
 export const ensureAuthenticated = async (request, response, next) => {
-  if (!publicUrls.includes(request.path)) {
+  if (publicUrls.includes(request.path)) {
     return next()
   }
 

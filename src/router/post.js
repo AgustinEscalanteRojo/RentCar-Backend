@@ -32,7 +32,7 @@ router.get('/:id', async (request, response) => {
     response.json({ posts })
   } catch (e) {
     if (e.message === 'Post not found') {
-      response.status(404).json(error.message)
+      response.status(404).json(e.message)
     }
     response.status(500).json('Something has gone wrong')
   }
@@ -44,10 +44,12 @@ router.post('/', async (request, response) => {
     const createdPost = await createPost({
       ...request.body,
       sellerId: request.user._id,
-    })
+    }, 
+    request.user
+    )
     response.json({ post: createdPost })
   } catch (e) {
-    response.status(500).json(error.message)
+    response.status(500).json(e.message)
   }
 })
 
@@ -61,7 +63,7 @@ router.put('/:id', async (request, response) => {
     })
     response.json({ from: 'server', post: updatedPost })
   } catch (e) {
-    response.status(500).json(error.message)
+    response.status(500).json(e.message)
   }
 })
 
@@ -71,7 +73,7 @@ router.delete('/:id', async (request, response) => {
     await deletePostById(request.params.id, request.user)
     response.json({ removed: true })
   } catch (e) {
-    response.status(500).json(error.message)
+    response.status(500).json(e.message)
   }
 })
 
@@ -80,12 +82,12 @@ router.post('/favs/:postId', async (request, response) => {
   try {
     await togglePostFavByUser(request.params.postId, request.user)
     response.json(true)
-  } catch (error) {
-    response.status(500).json(error.message)
+  } catch (e) {
+    response.status(500).json(e.message)
   }
 })
 
-router.post('/:postId', async (request, response) => {
+router.post('/:postId/comments', async (request, response) => {
   try {
     await createPostCommentByUser({
       postId: request.params.postId,
@@ -94,8 +96,8 @@ router.post('/:postId', async (request, response) => {
     })
 
     response.json(true)
-  } catch (error) {
-    response.status(500).json(error.message)
+  } catch (e) {
+    response.status(500).json(e.message)
   }
 })
 
