@@ -9,7 +9,6 @@ import {
   createPostCommentByUser,
   deletePostCommentByUser,
   addRatingToPostByUser,
-  addPostRequestByUser,
   updateRequestStatusBySeller
 } from '../controllers/post.js'
 
@@ -132,7 +131,7 @@ router.post('/valorations/:postId', async (request, response) => {
 // Request route
 router.post('/request/:postId', async (request, response) => {
   try {
-    await addPostRequestByUser({
+    await createPostCommentByUser({
       postId: request.params.postId,
       data: request.body,
       user: request.user,

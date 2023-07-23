@@ -1,5 +1,3 @@
-import { isValid } from 'date-fns'
-
 const WEEK_DAYS = {
   MONDAY: 'Monday',
   TUESDAY: 'Tuesday',
@@ -11,33 +9,17 @@ const WEEK_DAYS = {
 }
 
 /**
- * @param {object} availableTime
- * @param {Array<string>} availableTime.weekDay
- * @param {Array<object>} availableTime.weekDay
- * @param {date} availableTime.times.start
- * @param {date} availableTime.times.end
+ * @param {Array<string>} availableTimes
  */
-
-export const validatePostAvailableTime = (availableTime) => {
-  if (!availableTime.weekDay || !availableTime.times) {
-    throw new Error('Missing required fields from availabe time')
+export const validatePostAvailableTimesData = (availableTimes) => {
+  if (!availableTimes) {
+    throw new Error('Missing required fields from available time data')
   }
-}
 
-const valiDays = object.values(WEEK_DAYS)
-for (const weekDay of availableTime.weekDay) {
-  if (!valiDays.includes(weekDay)) {
-    throw new Error(`Invalid ${weekDay} week day`)
-  }
-}
-
-for (const time of availableTime.times) {
-    if(
-        !time.start ||
-        !time.end ||
-        !isValid(new Date(time.start)) ||
-        !isValid(new Date(time.end))
-    ) {
-        throw new Error(`Invalid ${JSON.stringify(time)}time`)
+  const validDays = Object.values(WEEK_DAYS)
+  for (const weekDay of availableTimes) {
+    if (!validDays.includes(weekDay)) {
+      throw new Error(`Invalid ${weekDay} week day`)
     }
+  }
 }

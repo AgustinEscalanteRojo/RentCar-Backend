@@ -3,8 +3,15 @@ import User from '../models/user.js'
 import UserPostComment from '../models/userPostComment.js'
 import UserPostRequest from '../models/userPostRequest.js'
 import UserPostValoration from '../models/userPostValoration.js'
-import { isValid } from 'date-fns'
-import { validatePostAvailableTime } from '../utils/post.js'
+import { validatePostAvailableTimesData } from '../utils/post.js'
+
+/**
+ * @returns {Promise<object[]>}
+ */
+// Función para obtener todos los posts
+export const getPosts = async () => {
+  return Post.find()
+}
 
 /**
  * @param {string} id
@@ -36,16 +43,9 @@ export const getPostById = async (id) => {
   return {
     ...post.toObject(),
     comment: postComments,
-    rating: rating / 5,
+    rating: rating / valorations,
     requests: postRequests,
   }
-}
-
-/**
- * @returns {Promise<object[]>}
- */
-export const getPosts = async () => {
-  return Post.find()
 }
 
 /**
@@ -60,6 +60,8 @@ export const getPosts = async () => {
  * @param {"manual", "automatic"} data.gearBoxType
  * @param {string} data.style
  * @param {string} data.sellerId
+ * @param {object} data.availableTimes
+ * @return {Promise<object>}
  */
 export const createPost = async (
   {
@@ -81,7 +83,7 @@ export const createPost = async (
     throw new Error('You dont have permission to create')
   }
 
-  if (!name || !model || !plateNumber || !km || !sellerId) {
+  if (!name || !model || !plateNumber || !sellerId) {
     throw new Error('Missing required fields')
   }
 
@@ -111,9 +113,7 @@ export const createPost = async (
   }
 
   if (availableTimes) {
-    for (const availableTime of availableTimes) {
-      validatePostAvailableTimeData(availableTime)
-    }
+    validatePostAvailableTimesData(availableTimes)
   }
 
   const post = new Post({
@@ -155,10 +155,13 @@ export const updatePost = async ({ id, data, user }) => {
     fuelType,
     gearBoxType,
     style,
-    availableTime,
+    availableTimes,
   } = data
 
-  const post = await getPostById(id)
+  const post = await Post.findOne({ _id: id })
+  if (!post) {
+    throw new Error('Post not found')
+  }
 
   if (
     post.sellerId.toString() !== user._id.toString() &&
@@ -221,6 +224,12 @@ export const updatePost = async ({ id, data, user }) => {
     } else {
       post.style = style
     }
+  }
+
+  if (availableTimes) {
+    validatePostAvailableTimesData(availableTimes)
+
+    post.availableTimes = availableTimes
   }
 
   await post.save()
@@ -352,7 +361,12 @@ export const deletePostCommentByUser = async ({ commentId, user }) => {
  * @returns {Promise<void>}
  */
 
+// Función para agregar una valoración a un post por parte de un usuario
 export const addRatingToPostByUser = async ({ postId, data, user }) => {
+  if (user.rol === 'seller') {
+    throw new Error('You cant post ratings')
+  }
+
   if (!data.rate) {
     throw new Error('missin require field ')
   }
@@ -364,6 +378,15 @@ export const addRatingToPostByUser = async ({ postId, data, user }) => {
 
   if (formattedRate < 0 || formattedRate > 5) {
     throw new Error('invalid range')
+  }
+
+  const hasRate = await UserPostValorations.findOne({
+    customerId: user._id,
+    postId: post._id,
+  })
+
+  if (hasRate) {
+    throw new Error('You already rate this post!')
   }
 
   const post = await getPostById(postId)
@@ -392,14 +415,30 @@ export const addRatingToPostByUser = async ({ postId, data, user }) => {
  */
 
 export const createPostRequestByUser = async ({ postId, data, user }) => {
-  if (!postId || !data.availableTime) {
+  if (!postId || !data.weekDay) {
     throw new Error('Missing some fields')
   }
 
-  validatePostAvailableTimeData(data.availableTime)
-
   const post = await getPostById(postId)
-  //TODO validar que el post esta disponible para el tiempo requerido
+
+  if (!post.availableTimes.includes(data.weekDay)) {
+    throw new Error(`This ${data.weekDay} is not available to this post`)
+  }
+
+  const isRequested = await UserPostRequest.findOne({
+    postId: post._id,
+    weekDay: data.weekDay,
+    createdAt: {
+      $gte: startOfDay(new Date()),
+      $lte: endOfDay(new Date()),
+    },
+    status: 'approved',
+  })
+
+  if (isRequested) {
+    throw new Error('The date is already booked')
+  }
+
   const postRequest = new UserPostRequest({
     postId: post._id,
     customerId: user._id,
@@ -410,28 +449,35 @@ export const createPostRequestByUser = async ({ postId, data, user }) => {
   await postRequest.save()
 }
 
-// Update request
-
-export const updateRequestStatusBySeller = async ({
-  postId,
-  data,
-  user,
-  requestId,
-}) => {
-  const post = await getPostById(postId)
+// Función para actualizar el estado de una solicitud de post por parte del vendedor
+export const updateRequestStatusBySeller = async ({ data, requestId }) => {
   const postRequest = await UserPostRequest.findOne({ _id: requestId })
-  if (
-    post.sellerId.toString() !== user._id.toString() &&
-    user.rol !== 'admin'
-  ) {
-    throw new Error('You dont have permission to edit this request')
-  }
 
   if (data.status) {
+    if (data.status === 'approved') {
+      const sameRequestDay = await UserPostRequest.find({
+        _id: { $not: postRequest._id },
+        weekDay: postRequest.weekDay,
+        postId: postRequest.postId,
+        createdAt: {
+          $gte: startOfDay(postRequest.createdAt),
+          $lte: endOfDay(postRequest.createdAt),
+        },
+      })
+
+      const sameRequestIds = sameRequestDay.map((request) => request._id)
+      if (sameRequestIds.length > 0) {
+        await UserPostRequest.updateMany(
+          { _id: { $in: sameRequestIds } },
+          { status: 'rejected' }
+        )
+      }
+    }
+
     postRequest.status = data.status
   }
 
-  await post.save()
+  await postRequest.save()
 
-  return post
+  return postRequest
 }

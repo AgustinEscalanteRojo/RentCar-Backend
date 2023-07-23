@@ -55,7 +55,7 @@ export const signup = async ({
     throw new Error('Document must be composed of numbers and letters')
   }
 
-  const validRoles = ['Seller', 'Customer']
+  const validRoles = ['seller', 'customer']
   if (rol && !validRoles.includes(rol)) {
     throw new Error(`Your role must be one of the following: ${validRoles}`)
   }
