@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const UserPostValorationSchema = new mongoose.Schema(
+const userPostValorationSchema = new mongoose.Schema(
   {
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -27,9 +27,9 @@ const UserPostValorationSchema = new mongoose.Schema(
   { collection: 'userPostValorations' }
 )
 
-const UserPostValoration = mongoose.model(
+const UserPostValorations = mongoose.model(
   'UserPostValorations',
-  UserPostValorationSchema
+  userPostValorationSchema
 )
 
-export default UserPostValoration
+export default UserPostValorations

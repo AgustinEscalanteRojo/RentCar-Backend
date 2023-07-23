@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const UserPostRequestSchema = new mongoose.Schema(
+const userPostRequestSchema = new mongoose.Schema(
   {
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -40,7 +40,7 @@ const UserPostRequestSchema = new mongoose.Schema(
 
 const UserPostRequest = mongoose.model(
   'UserPostRequests',
-  UserPostRequestSchema
+  userPostRequestSchema
 )
 
 export default UserPostRequest

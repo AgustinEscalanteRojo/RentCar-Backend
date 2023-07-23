@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const UserPostCommentSchema = new mongoose.Schema(
+const userPostCommentSchema = new mongoose.Schema(
   {
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -25,6 +25,6 @@ const UserPostCommentSchema = new mongoose.Schema(
   { collection: 'userPostComments' }
 )
 
-const UserPostComment = mongoose.model('UserPostComment', UserPostCommentSchema)
+const UserPostComment = mongoose.model('UserPostComment', userPostCommentSchema)
 
 export default UserPostComment

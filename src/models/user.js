@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
-      loweCase: true,
+      lowerCase: true,
     },
     password: {
       type: String,
@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema(
     lastName: {
       type: String,
     },
-
     dateOfBirth: {
       type: Date,
     },
@@ -36,6 +35,11 @@ const userSchema = new mongoose.Schema(
     },
     document: {
       type: String,
+    },
+    createdAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
     },
     favPosts: [
       {

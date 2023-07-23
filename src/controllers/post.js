@@ -2,17 +2,18 @@ import Post from '../models/post.js'
 import User from '../models/user.js'
 import UserPostComment from '../models/userPostComment.js'
 import UserPostRequest from '../models/userPostRequest.js'
-import UserPostValoration from '../models/userPostValoration.js'
+import UserPostValorations from '../models/userPostValoration.js'
 import { validatePostAvailableTimesData } from '../utils/post.js'
 
+//Get all posts controller
 /**
  * @returns {Promise<object[]>}
  */
-// Función para obtener todos los posts
 export const getPosts = async () => {
   return Post.find()
 }
 
+//Get post by id controller
 /**
  * @param {string} id
  * @returns {Promise<object>}
@@ -24,7 +25,7 @@ export const getPostById = async (id) => {
     throw new Error('Post not found')
   }
 
-  const postValorations = await UserPostValoration.find({
+  const postValorations = await UserPostValorations.find({
     postId: post._id,
   })
 
@@ -40,21 +41,26 @@ export const getPostById = async (id) => {
     postId: post._id,
   })
 
+  const totalValorations = postValorations.length
+
+  const averageRating = totalValorations < 0 ? rating / totalValorations : 0
+
   return {
     ...post.toObject(),
     comment: postComments,
-    rating: rating / valorations,
+    rating: averageRating,
     requests: postRequests,
   }
 }
 
+//Create post controller
 /**
  * @param {object} data
  * @param {string} data.name
  * @param {"car", "moto", "van"} data.type
  * @param {string} data.model
  * @param {string} data.plateNumber
- * @param {string} data.km
+ * @param {number} data.km
  * @param {string} data.carSeat
  * @param {"gas", "electric", "hybrid"} data.fuelType
  * @param {"manual", "automatic"} data.gearBoxType
@@ -63,8 +69,11 @@ export const getPostById = async (id) => {
  * @param {object} data.availableTimes
  * @return {Promise<object>}
  */
-export const createPost = async (
-  {
+export const createPost = async ({ data, user }) => {
+  if (user.rol === 'customer') {
+    throw new Error("You don't have permission")
+  }
+  const {
     name,
     type,
     model,
@@ -76,12 +85,7 @@ export const createPost = async (
     style,
     sellerId,
     availableTimes,
-  },
-  user
-) => {
-  if (user.rol === 'customer') {
-    throw new Error('You dont have permission to create')
-  }
+  } = data
 
   if (!name || !model || !plateNumber || !sellerId) {
     throw new Error('Missing required fields')
@@ -136,12 +140,18 @@ export const createPost = async (
 /**
  * @param {string} id
  * @param {object} data
+ * @param {string} data.name
  * @param {object} user
- * @param {object[]} data.availableTime
- * @param {'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'} data.availableTime.weekDay
- * @param {object[]} data.availableTime.timing
- * @param {Date} data.availableTime.timing.start
- * @param {Date} data.availableTime.timing.end
+ * @param {"car", "moto", "van"} data.type
+ * @param {string} data.model
+ * @param {string} data.plateNumber
+ * @param {number} data.km
+ * @param {string} data.carSeat
+ * @param {"gas", "electric", "hybrid"} data.fuelType
+ * @param {"manual", "automatic"} data.gearBoxType
+ * @param {string} data.style
+ * @param {string} data.sellerId
+ * @param {object} data.availableTimes
  * @return {Promise<object>}
  */
 export const updatePost = async ({ id, data, user }) => {
@@ -256,11 +266,12 @@ export const deletePostById = async (postId, user) => {
     throw new Error('You do not have permission to delete this post')
   }
 
-  await Post.deleteOne({ _id: id })
+  await Post.deleteOne({ _id: postId })
 
   return true
 }
 
+//Favorite post controller
 /**
  *
  * @param {string} postId
@@ -290,6 +301,7 @@ export const togglePostFavByUser = async (postId, user) => {
   await User.updateOne({ _id: user._id }, { favPosts: newFavList })
 }
 
+// Create comment by user controller
 /**
  *
  * @param {string} postId
@@ -310,14 +322,15 @@ export const createPostCommentByUser = async ({ postId, data, user }) => {
 
   const post = await getPostById(postId)
   const postComment = new UserPostComment({
-    postId: post._id,
     customerId: user._id,
+    postId: post._id,
     comment: data.comment,
   })
 
   await postComment.save()
 }
 
+// Delete comment by user controller
 /**
  *
  * @param {string} commentId
@@ -350,7 +363,7 @@ export const deletePostCommentByUser = async ({ commentId, user }) => {
   return true
 }
 
-// añadir ratio
+// Función para agregar una valoración a un post por parte de un usuario
 
 /**
  * @param {string} postId
@@ -361,7 +374,6 @@ export const deletePostCommentByUser = async ({ commentId, user }) => {
  * @returns {Promise<void>}
  */
 
-// Función para agregar una valoración a un post por parte de un usuario
 export const addRatingToPostByUser = async ({ postId, data, user }) => {
   if (user.rol === 'seller') {
     throw new Error('You cant post ratings')
@@ -372,6 +384,7 @@ export const addRatingToPostByUser = async ({ postId, data, user }) => {
   }
 
   const formattedRate = Number(data.rate)
+
   if (isNan(formattedRate)) {
     throw new Error('invalid field')
   }
@@ -379,6 +392,7 @@ export const addRatingToPostByUser = async ({ postId, data, user }) => {
   if (formattedRate < 0 || formattedRate > 5) {
     throw new Error('invalid range')
   }
+  const post = await getPostById(postId)
 
   const hasRate = await UserPostValorations.findOne({
     customerId: user._id,
@@ -389,29 +403,21 @@ export const addRatingToPostByUser = async ({ postId, data, user }) => {
     throw new Error('You already rate this post!')
   }
 
-  const post = await getPostById(postId)
-
-  const postRating = new UserPostValoration({
+  const postRating = new UserPostValorations({
     customerId: user._id,
     postId: post._id,
-    rate: formattedRate,
+    rate: data.rate,
   })
 
   await postRating.save()
 }
 
-// Add request & update request
-
+// Add request
 /**
- *
  * @param {string} postId
  * @param {object} data
  * @param {string} data.status
- * @param {object[]} data.time
- * @param {'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'} data.time.weekDay
- * @param {object[]} data.time.timing
- * @param {Date} data.time.timing.start
- * @param {Date} data.time.timing.end
+ * @param {object} data.time
  */
 
 export const createPostRequestByUser = async ({ postId, data, user }) => {
@@ -443,7 +449,7 @@ export const createPostRequestByUser = async ({ postId, data, user }) => {
     postId: post._id,
     customerId: user._id,
     status: data.status,
-    time: data.availableTime,
+    weekDay: data.weekDay,
   })
 
   await postRequest.save()

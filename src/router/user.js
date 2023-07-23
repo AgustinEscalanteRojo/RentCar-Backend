@@ -1,8 +1,9 @@
 import express from 'express'
-import { getUsers, getUserById, removeUserById } from '../controllers/user.js'
+import { getUsers, removeUserById } from '../controllers/user.js'
 
 const router = express.Router()
 
+// Get all users route (only admin)
 router.get('/', async (request, response) => {
   try {
     const users = await getUsers(request.user)
@@ -12,8 +13,7 @@ router.get('/', async (request, response) => {
   }
 })
 
-
-// ruta para borrar por Id
+// Delete user by id route (only admin)
 
 router.delete('/:id', async (request, response) => {
   try {

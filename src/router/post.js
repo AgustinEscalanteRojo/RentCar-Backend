@@ -9,6 +9,7 @@ import {
   createPostCommentByUser,
   deletePostCommentByUser,
   addRatingToPostByUser,
+  createPostRequestByUser,
   updateRequestStatusBySeller
 } from '../controllers/post.js'
 
@@ -27,13 +28,10 @@ router.get('/', async (request, response) => {
 // Ruta para obtener por ID
 router.get('/:id', async (request, response) => {
   try {
-    const posts = await getPostById(request.params.id)
-    response.json({ posts })
+    const post = await getPostById(request.params.id)
+    response.json({ post })
   } catch (e) {
-    if (e.message === 'Post not found') {
-      response.status(404).json(e.message)
-    }
-    response.status(500).json('Something has gone wrong')
+    response.status(500).json(e.message)
   }
 })
 
@@ -60,7 +58,7 @@ router.put('/:id', async (request, response) => {
       data: request.body,
       user: request.user,
     })
-    response.json({ from: 'server', post: updatedPost })
+    response.json(updatedPost )
   } catch (e) {
     response.status(500).json(e.message)
   }
@@ -69,7 +67,7 @@ router.put('/:id', async (request, response) => {
 // Ruta para eliminar por ID
 router.delete('/:id', async (request, response) => {
   try {
-    await deletePostById(request.params.id, request.user)
+    await deletePostById({postId: request.params.id, user: request.user})
     response.json({ removed: true })
   } catch (e) {
     response.status(500).json(e.message)
@@ -77,15 +75,16 @@ router.delete('/:id', async (request, response) => {
 })
 
 // ruta para favoritos
-router.post('/favs/:postId', async (request, response) => {
+router.post('/:id/favs', async (request, response) => {
   try {
-    await togglePostFavByUser(request.params.postId, request.user)
+    await togglePostFavByUser(request.params.id, request.user)
     response.json(true)
   } catch (e) {
     response.status(500).json(e.message)
   }
 })
 
+// Comment post route
 router.post('/:postId/comments', async (request, response) => {
   try {
     await createPostCommentByUser({
@@ -100,7 +99,8 @@ router.post('/:postId/comments', async (request, response) => {
   }
 })
 
-router.delete('/:commentId', async (request, response) => {
+// Delete comments route
+router.delete('/comments/:commentId', async (request, response) => {
   try {
     await deletePostCommentByUser({
       commentId: request.params.commentId,
@@ -114,7 +114,6 @@ router.delete('/:commentId', async (request, response) => {
 })
 
 // ruta para valoraciones
-
 router.post('/valorations/:postId', async (request, response) => {
   try {
     await addRatingToPostByUser({
@@ -129,9 +128,9 @@ router.post('/valorations/:postId', async (request, response) => {
 })
 
 // Request route
-router.post('/request/:postId', async (request, response) => {
+router.post('/:postId/request', async (request, response) => {
   try {
-    await createPostCommentByUser({
+    await createPostRequestByUser({
       postId: request.params.postId,
       data: request.body,
       user: request.user,

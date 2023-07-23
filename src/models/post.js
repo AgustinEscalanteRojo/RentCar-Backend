@@ -8,7 +8,7 @@ const PostSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['car', 'moto', 'van'],
+      enum: ['car', 'motorcycle', 'van'],
     },
     model: {
       type: String,
@@ -64,6 +64,6 @@ const PostSchema = new mongoose.Schema(
   { collection: 'posts' }
 )
 
-const Post = mongoose.model('Posts', PostSchema)
+const Post = mongoose.model('Post', PostSchema)
 
 export default Post

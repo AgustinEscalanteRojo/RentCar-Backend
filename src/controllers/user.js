@@ -1,5 +1,6 @@
 import User from '../models/user.js'
 
+// Get all users controller (only admin)
 /**
  * @returns {Promise<object>}
  */
@@ -11,6 +12,7 @@ export const getUsers = async (user) => {
   return User.find()
 }
 
+// Get user by id controller
 /**
  *
  * @param {string} id
@@ -27,6 +29,7 @@ export const getUserById = async (id) => {
   return user
 }
 
+// Delete user by id controller (only admin)
 /**
  * @param {string} id
  * @param {object} user
