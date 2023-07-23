@@ -41,13 +41,13 @@ export const getPostById = async (id) => {
     postId: post._id,
   })
 
-  const totalValorations = postValorations.length
-
-  const averageRating = totalValorations < 0 ? rating / totalValorations : 0
+  const totalValorations= postValorations.length
+  
+  const averageRating = totalValorations > 0 ? rating / totalValorations : 0
 
   return {
     ...post.toObject(),
-    comment: postComments,
+    comments: postComments,
     rating: averageRating,
     requests: postRequests,
   }
@@ -363,35 +363,33 @@ export const deletePostCommentByUser = async ({ commentId, user }) => {
   return true
 }
 
-// Función para agregar una valoración a un post por parte de un usuario
-
+//Rating by user controller
 /**
  * @param {string} postId
- * @param {object} data
- * @param {number} data.rate
  * @param {object} user
+ * @param {object} data
+ * @param {object} data.rate
  * @param {string} user._id
- * @returns {Promise<void>}
  */
-
 export const addRatingToPostByUser = async ({ postId, data, user }) => {
   if (user.rol === 'seller') {
-    throw new Error('You cant post ratings')
+    throw new Error("You can't rate posts being seller")
   }
 
   if (!data.rate) {
-    throw new Error('missin require field ')
+    throw new Error('missing require field')
   }
 
   const formattedRate = Number(data.rate)
 
-  if (isNan(formattedRate)) {
+  if (isNaN(formattedRate)) {
     throw new Error('invalid field')
   }
 
   if (formattedRate < 0 || formattedRate > 5) {
     throw new Error('invalid range')
   }
+
   const post = await getPostById(postId)
 
   const hasRate = await UserPostValorations.findOne({
@@ -408,7 +406,6 @@ export const addRatingToPostByUser = async ({ postId, data, user }) => {
     postId: post._id,
     rate: data.rate,
   })
-
   await postRating.save()
 }
 

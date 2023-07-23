@@ -39,11 +39,12 @@ router.get('/:id', async (request, response) => {
 router.post('/', async (request, response) => {
   try {
     const createdPost = await createPost({
-      ...request.body,
-      sellerId: request.user._id,
-    }, 
-    request.user
-    )
+      data: {
+        ...request.body,
+        sellerId: request.user._id,
+      },
+      user: request.user,
+    })
     response.json({ post: createdPost })
   } catch (e) {
     response.status(500).json(e.message)
