@@ -14,7 +14,6 @@ export const getPosts = async (filters) => {
   const filtersData = {}
 
   if (filters) {
-    
     if (filters.type) {
       filtersData.type = filters.type
     }
@@ -497,7 +496,7 @@ export const createPostRequestByUser = async ({ postId, data, user }) => {
 /**
  * @param {string} requestId
  * @param {object} data
- * @param {'approve | 'pending' | 'rejected' | 'canceled'} data.status
+ * @param {'approved | 'pending' | 'rejected' | 'canceled'} data.status
  */
 export const updateRequestStatusBySeller = async ({
   data,
@@ -519,13 +518,13 @@ export const updateRequestStatusBySeller = async ({
 
   if (user.rol === 'seller') {
     const post = await Post.find({ _id: postRequest.postId })
-    if (post.sellerId.toString() !== user._id) {
+    if (post && post.sellerId && post.sellerId.toString() !== user._id) {
       throw new Error('You arent the author of the request')
     }
   }
 
   if (data.status) {
-    if (data.status === 'approve') {
+    if (data.status === 'approved') {
       const sameRequestDay = await UserPostRequest.find({
         _id: { $ne: postRequest._id },
         weekDay: postRequest.weekDay,

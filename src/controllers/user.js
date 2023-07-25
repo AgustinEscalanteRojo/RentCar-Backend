@@ -1,3 +1,4 @@
+import Post from '../models/post.js'
 import User from '../models/user.js'
 import UserPostRequest from '../models/userPostRequest.js'
 
@@ -45,7 +46,6 @@ export const removeUserById = async (id, user) => {
 
   return true
 }
-
 
 export const getRequestByUser = async (user) => {
   if (user.rol === 'customer') {
