@@ -32,4 +32,13 @@ router.get('/me', async (request, response) => {
   }
 })
 
+router.get('/me/request', async (request, response) => {
+  try {
+    const postsRequests = await getRequestByUser(request.user)
+    response.json(postsRequests)
+  } catch (error) {
+    response.status(500).json(error.message)
+  }
+})
+
 export default router

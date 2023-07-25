@@ -9,8 +9,58 @@ import { validatePostAvailableTimesData } from '../utils/post.js'
 /**
  * @returns {Promise<object[]>}
  */
-export const getPosts = async () => {
-  return Post.find()
+export const getPosts = async (filters) => {
+  const filtersData = {}
+
+  if (filters.name) {
+    filtersData.name = {
+      $regex: filters.name,
+    }
+  }
+
+  if (filters) {
+    if (filters.type) {
+      filtersData.type = filters.type
+    }
+
+    if (filters) {
+      if (filters.model) {
+        filtersData.model = filters.model
+      }
+    }
+
+    if (filters.plateNumber) {
+      filtersData.plateNumber = filters.plateNumber
+    }
+
+    if (filters.km) {
+      filtersData.km = filters.km
+    }
+
+    if (filters.carSeat) {
+      filtersData.carSeat = filters.carSeat
+    }
+
+    if (filters.fuelType) {
+      filtersData.fuelType = filters.fuelType
+    }
+
+    if (filters.gearBoxType) {
+      filtersData.gearBoxType = filters.gearBoxType
+    }
+
+    if (filters.style) {
+      filtersData.style = filters.style
+    }
+
+    if (filters.time) {
+      filtersData.availableTimes = {
+        $in: filters.time.split(','),
+      }
+    }
+  }
+
+  return Post.find(filtersData)
 }
 
 //Get post by id controller
@@ -41,8 +91,8 @@ export const getPostById = async (id) => {
     postId: post._id,
   })
 
-  const totalValorations= postValorations.length
-  
+  const totalValorations = postValorations.length
+
   const averageRating = totalValorations > 0 ? rating / totalValorations : 0
 
   return {
@@ -453,13 +503,40 @@ export const createPostRequestByUser = async ({ postId, data, user }) => {
 }
 
 // Función para actualizar el estado de una solicitud de post por parte del vendedor
-export const updateRequestStatusBySeller = async ({ data, requestId }) => {
+/**
+ * @param {string} requestId
+ * @param {object} data
+ * @param {'approved | 'pending' | 'rejected' | 'canceled'} data.status
+ */
+export const updateRequestStatusBySeller = async ({
+  data,
+  requestId,
+  user,
+}) => {
   const postRequest = await UserPostRequest.findOne({ _id: requestId })
 
+  if (!postRequest) {
+    throw new Error('Post request not found')
+  }
+
+  if (
+    user.rol === 'customer' &&
+    user._id.toString() !== postRequest.customerId.toString()
+  ) {
+    throw new Error('You dont have permission')
+  }
+
+  if (user.rol === 'seller') {
+    const post = await Post.find({ _id: postRequest.postId })
+    if (post.sellerId.toString() !== user._id) {
+      throw new Error('You arent the author of the request')
+    }
+  }
+
   if (data.status) {
-    if (data.status === 'approved') {
+    if (data.status === 'approve') {
       const sameRequestDay = await UserPostRequest.find({
-        _id: { $not: postRequest._id },
+        _id: { $ne: postRequest._id },
         weekDay: postRequest.weekDay,
         postId: postRequest.postId,
         createdAt: {
@@ -476,7 +553,6 @@ export const updateRequestStatusBySeller = async ({ data, requestId }) => {
         )
       }
     }
-
     postRequest.status = data.status
   }
 

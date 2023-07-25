@@ -1,4 +1,5 @@
 import User from '../models/user.js'
+import UserPostRequest from '../models/userPostRequest.js'
 
 // Get all users controller (only admin)
 /**
@@ -46,4 +47,19 @@ export const removeUserById = async (id, user) => {
 }
 
 
+export const getRequestByUser = async (user) => {
+  if (user.rol === 'customer') {
+    return UserPostRequest.find({
+      customerId: user._id,
+    })
+  }
 
+  const sellerPosts = await Post.find({
+    sellerId: user._id,
+  })
+
+  const postsIds = sellerPosts.map((sellerPost) => sellerPost._id)
+  return UserPostRequest.find({
+    postId: { $in: postsIds },
+  })
+}

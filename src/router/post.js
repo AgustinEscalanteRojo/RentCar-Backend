@@ -15,11 +15,11 @@ import {
 
 const router = express.Router()
 
-// Get all
+// Get all posts route
 router.get('/', async (request, response) => {
   try {
-    const post = await getPosts()
-    response.json({ post })
+    const posts = await getPosts(request.query)
+    response.json({ posts })
   } catch {
     response.status(500).json('Something has gone wrong')
   }
