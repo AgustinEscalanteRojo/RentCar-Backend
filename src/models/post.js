@@ -1,18 +1,19 @@
 import mongoose from 'mongoose'
 
-const PostSchema = new mongoose.Schema(
+// Post model
+const postSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      require: true,
     },
     type: {
       type: String,
       enum: ['car', 'motorcycle', 'van'],
+      required: true,
     },
     model: {
       type: String,
-      required: true,
     },
     plateNumber: {
       type: String,
@@ -21,25 +22,32 @@ const PostSchema = new mongoose.Schema(
     km: {
       type: Number,
     },
-    carSeat: {
+    carSeats: {
       type: Number,
     },
     fuelType: {
       type: String,
-      enum: ['gas', 'electric', 'hybrid'],
+      enum: ['gas', 'electric'],
     },
     gearBoxType: {
       type: String,
       enum: ['manual', 'automatic'],
     },
+    description: {
+      type: String,
+    },
     style: {
       type: String,
-      enum: ['4x4', 'minivan', 'sports'],
+      enum: ['4x4', 'coupé', 'sedan', 'compact'],
     },
     sellerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+    status: {
+      type: String,
+      enum: ['oculto', 'activo'],
     },
     createdAt: {
       type: Date,
@@ -64,6 +72,6 @@ const PostSchema = new mongoose.Schema(
   { collection: 'posts' }
 )
 
-const Post = mongoose.model('Post', PostSchema)
+const Post = mongoose.model('Post', postSchema)
 
 export default Post

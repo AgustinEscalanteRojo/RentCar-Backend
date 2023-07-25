@@ -10,7 +10,7 @@ import {
   deletePostCommentByUser,
   addRatingToPostByUser,
   createPostRequestByUser,
-  updateRequestStatusBySeller
+  updateRequestStatusBySeller,
 } from '../controllers/post.js'
 
 const router = express.Router()
@@ -59,7 +59,7 @@ router.put('/:id', async (request, response) => {
       data: request.body,
       user: request.user,
     })
-    response.json(updatedPost )
+    response.json(updatedPost)
   } catch (e) {
     response.status(500).json(e.message)
   }
@@ -68,7 +68,7 @@ router.put('/:id', async (request, response) => {
 // Ruta para eliminar por ID
 router.delete('/:id', async (request, response) => {
   try {
-    await deletePostById({postId: request.params.id, user: request.user})
+    await deletePostById({ postId: request.params.id, user: request.user })
     response.json({ removed: true })
   } catch (e) {
     response.status(500).json(e.message)
@@ -143,13 +143,14 @@ router.post('/:postId/request', async (request, response) => {
 })
 
 // Update request route
-router.put('/request/:postId/:requestId', async (request, response) => {
+router.put('/:requestId/request', async (request, response) => {
   try {
-    await updateRequestStatusBySeller(
-      request.params.postId,
-      request.body,
-      request.user
-    )
+    await updateRequestStatusBySeller({
+      requestId: request.params.requestId,
+      data: request.body,
+      user: request.user,
+    })
+    response.json(true)
   } catch (error) {
     response.status(500).json(error.message)
   }

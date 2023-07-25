@@ -12,10 +12,15 @@ const userPostRequestSchema = new mongoose.Schema(
       ref: 'Post',
       required: true,
     },
+    createdAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
     status: {
       type: String,
+      enum: ['pending', 'rejected', 'approved', 'canceled'],
       default: 'pending',
-      enum: ['pending', 'approved', 'rejected', 'canceled'],
     },
     weekDay: {
       type: String,
@@ -29,18 +34,10 @@ const userPostRequestSchema = new mongoose.Schema(
         'Sunday',
       ],
     },
-    createdAt: {
-      type: Date,
-      required: true,
-      default: Date.now,
-    },
   },
   { collection: 'userPostRequests' }
 )
 
-const UserPostRequest = mongoose.model(
-  'UserPostRequests',
-  userPostRequestSchema
-)
+const UserPostRequest = mongoose.model('Request', userPostRequestSchema)
 
 export default UserPostRequest

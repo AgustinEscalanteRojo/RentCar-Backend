@@ -1,44 +1,22 @@
 import Post from '../models/post.js'
 import User from '../models/user.js'
 import UserPostComment from '../models/userPostComment.js'
-import UserPostRequest from '../models/userPostRequest.js'
 import UserPostValorations from '../models/userPostValoration.js'
+import UserPostRequest from '../models/userPostRequest.js'
 import { validatePostAvailableTimesData } from '../utils/post.js'
+import { startOfDay, endOfDay } from 'date-fns'
 
 //Get all posts controller
 /**
- * @returns {Promise<object[]>}
+ * @return {Promise<object[]>}
  */
 export const getPosts = async (filters) => {
   const filtersData = {}
 
-  if (filters.name) {
-    filtersData.name = {
-      $regex: filters.name,
-    }
-  }
-
   if (filters) {
+    
     if (filters.type) {
       filtersData.type = filters.type
-    }
-
-    if (filters) {
-      if (filters.model) {
-        filtersData.model = filters.model
-      }
-    }
-
-    if (filters.plateNumber) {
-      filtersData.plateNumber = filters.plateNumber
-    }
-
-    if (filters.km) {
-      filtersData.km = filters.km
-    }
-
-    if (filters.carSeat) {
-      filtersData.carSeat = filters.carSeat
     }
 
     if (filters.fuelType) {
@@ -51,6 +29,12 @@ export const getPosts = async (filters) => {
 
     if (filters.style) {
       filtersData.style = filters.style
+    }
+
+    if (filters.name) {
+      filtersData.name = {
+        $regex: filters.name,
+      }
     }
 
     if (filters.time) {
@@ -66,7 +50,7 @@ export const getPosts = async (filters) => {
 //Get post by id controller
 /**
  * @param {string} id
- * @returns {Promise<object>}
+ * @return {Promise<object>}
  */
 export const getPostById = async (id) => {
   const post = await Post.findOne({ _id: id })
@@ -107,15 +91,18 @@ export const getPostById = async (id) => {
 /**
  * @param {object} data
  * @param {string} data.name
- * @param {"car", "moto", "van"} data.type
+ * @param {"car" | "motorcycle" | "van"} data.type
  * @param {string} data.model
  * @param {string} data.plateNumber
  * @param {number} data.km
- * @param {string} data.carSeat
- * @param {"gas", "electric", "hybrid"} data.fuelType
- * @param {"manual", "automatic"} data.gearBoxType
- * @param {string} data.style
+ * @param {number} data.carSeats
+ * @param {"gas" | "electric" } data.fuelType
+ * @param {"manual" | "automatic" } data.gearBoxType
+ * @param {string} data.description
+ * @param {"4x4" | "coupé" | "sedan" | "compact" } data.style
  * @param {string} data.sellerId
+ * @param {"oculto" | "activo"} data.status
+ * @param {string} data.name
  * @param {object} data.availableTimes
  * @return {Promise<object>}
  */
@@ -129,41 +116,48 @@ export const createPost = async ({ data, user }) => {
     model,
     plateNumber,
     km,
-    carSeat,
+    carSeats,
     fuelType,
     gearBoxType,
+    description,
     style,
     sellerId,
+    status,
     availableTimes,
   } = data
 
-  if (!name || !model || !plateNumber || !sellerId) {
+  if (!name || !type || !plateNumber || !sellerId) {
     throw new Error('Missing required fields')
+  }
+
+  const validPostType = ['car', 'motorcycle', 'van']
+  if (!validPostType.includes(type)) {
+    throw new Error('This is not valid type ')
   }
 
   const existPost = await Post.findOne({ name, type, sellerId })
   if (existPost) {
-    throw new Error('This post already exist')
+    throw new Error('This post already exist!')
   }
 
-  const validPostType = ['car', 'moto', 'van']
-  if (type && !validPostType.includes(type)) {
-    throw new Error('This is not valid type')
-  }
-
-  const validFuelType = ['gas', 'electric', 'hybrid']
+  const validFuelType = ['gas', 'electric']
   if (fuelType && !validFuelType.includes(fuelType)) {
-    throw new Error('Invalid fuel type')
+    throw new Error('invalid fuel type')
   }
 
   const validGearBoxType = ['manual', 'automatic']
   if (gearBoxType && !validGearBoxType.includes(gearBoxType)) {
-    throw new Error('Invalid gear box type')
+    throw new Error('invalid gear box type')
   }
 
-  const validStyle = ['4x4', 'minivan', 'sports']
-  if (style && !validStyle.includes(validStyle)) {
-    throw new Error('Invalid style')
+  const validStyle = ['4x4', 'coupé', 'sedan', 'compact']
+  if (style && !validStyle.includes(style)) {
+    throw new Error('invalid style')
+  }
+
+  const validStatus = ['oculto', 'activo']
+  if (status && !validStatus.includes(status)) {
+    throw new Error('invalid status')
   }
 
   if (availableTimes) {
@@ -176,32 +170,35 @@ export const createPost = async ({ data, user }) => {
     model,
     plateNumber,
     km,
-    carSeat,
+    carSeats,
     fuelType,
     gearBoxType,
+    description,
     style,
     sellerId,
+    status,
     availableTimes,
   })
+
   return post.save()
 }
 
-// verifica si un usuario tiene los permisos adecuados para actualizar un post
+//Update post controller
 /**
- * @param {string} id
  * @param {object} data
  * @param {string} data.name
- * @param {object} user
- * @param {"car", "moto", "van"} data.type
+ * @param {"car" | "motorcycle" | "van"} data.type
  * @param {string} data.model
  * @param {string} data.plateNumber
  * @param {number} data.km
- * @param {string} data.carSeat
- * @param {"gas", "electric", "hybrid"} data.fuelType
- * @param {"manual", "automatic"} data.gearBoxType
- * @param {string} data.style
+ * @param {number} data.carSeats
+ * @param {"gas" | "electric" } data.fuelType
+ * @param {"manual" | "automatic" } data.gearBoxType
+ * @param {string} data.description
+ * @param {"4x4" | "coupé" | "sedan" | "compact" } data.style
  * @param {string} data.sellerId
- * @param {object} data.availableTimes
+ * @param {"oculto" | "activo"} data.status
+ * @param {string} data.name
  * @return {Promise<object>}
  */
 export const updatePost = async ({ id, data, user }) => {
@@ -211,10 +208,12 @@ export const updatePost = async ({ id, data, user }) => {
     model,
     plateNumber,
     km,
-    carSeat,
+    carSeats,
     fuelType,
     gearBoxType,
+    description,
     style,
+    status,
     availableTimes,
   } = data
 
@@ -223,34 +222,42 @@ export const updatePost = async ({ id, data, user }) => {
     throw new Error('Post not found')
   }
 
-  if (
-    post.sellerId.toString() !== user._id.toString() &&
-    user.rol !== 'admin'
-  ) {
-    throw new Error('This post can only be edited by its author')
-  }
-
-  if (name) {
-    post.name = name
+  if (availableTimes) {
+    validatePostAvailableTimesData(availableTimes)
   }
 
   if (model) {
     post.model = model
   }
 
-  if (plateNumber) {
-    post.plateNumber = plateNumber
-  }
-
   if (km) {
     post.km = km
   }
 
-  if (carSeat) {
-    post.carSeat = carSeat
+  if (carSeats) {
+    post.carSeats = carSeats
   }
 
-  const validPostType = ['car', 'moto', 'van']
+  if (description) {
+    post.description = description
+  }
+
+  if (
+    post.sellerId.toString() !== user._id.toString() &&
+    user.rol !== 'admin'
+  ) {
+    throw new Error('you do not have permission')
+  }
+
+  if (name) {
+    post.name = name
+  }
+
+  if (plateNumber) {
+    post.plateNumber = plateNumber
+  }
+
+  const validPostType = ['car', 'motorcycle', 'van']
   if (type) {
     if (!validPostType.includes(type)) {
       throw new Error('This is not valid type ')
@@ -259,7 +266,7 @@ export const updatePost = async ({ id, data, user }) => {
     }
   }
 
-  const validFuelType = ['gas', 'electric', 'hybrid']
+  const validFuelType = ['gas', 'electric']
   if (fuelType) {
     if (fuelType && !validFuelType.includes(fuelType)) {
       throw new Error('invalid fuel type')
@@ -277,7 +284,7 @@ export const updatePost = async ({ id, data, user }) => {
     }
   }
 
-  const validStyle = ['4x4', 'minivan', 'sports']
+  const validStyle = ['4x4', 'coupé', 'sedan', 'compact']
   if (style) {
     if (style && !validStyle.includes(style)) {
       throw new Error('invalid style')
@@ -286,10 +293,13 @@ export const updatePost = async ({ id, data, user }) => {
     }
   }
 
-  if (availableTimes) {
-    validatePostAvailableTimesData(availableTimes)
-
-    post.availableTimes = availableTimes
+  const validStatus = ['oculto', 'activo']
+  if (status) {
+    if (status && !validStatus.includes(status)) {
+      throw new Error('invalid status')
+    } else {
+      post.status = status
+    }
   }
 
   await post.save()
@@ -297,7 +307,7 @@ export const updatePost = async ({ id, data, user }) => {
   return post
 }
 
-// vendedor como el administrador puedan borrar el post
+//Delete post controller
 /**
  * @param {string} postId
  * @param {string} sellerId
@@ -306,14 +316,14 @@ export const updatePost = async ({ id, data, user }) => {
  * @param {'admin' | 'seller' | 'customer'} user.rol
  * @returns {Promise<boolean>}
  */
-export const deletePostById = async (postId, user) => {
+export const deletePostById = async ({ postId, user }) => {
   const post = await getPostById(postId)
 
   if (
     post.sellerId.toString() !== user._id.toString() &&
     user.rol !== 'admin'
   ) {
-    throw new Error('You do not have permission to delete this post')
+    throw new Error('No tienes permiso')
   }
 
   await Post.deleteOne({ _id: postId })
@@ -323,15 +333,13 @@ export const deletePostById = async (postId, user) => {
 
 //Favorite post controller
 /**
- *
  * @param {string} postId
  * @param {object} user
  * @param {object[]} user.favPosts
  */
-
 export const togglePostFavByUser = async (postId, user) => {
   if (!postId) {
-    throw new Error('PostId is required')
+    throw new Error('id is required')
   }
   const post = await getPostById(postId)
   const currentFavs = user.favPosts || []
@@ -347,27 +355,21 @@ export const togglePostFavByUser = async (postId, user) => {
       (currentId) => currentId.toString() !== postId.toString()
     )
   }
-
   await User.updateOne({ _id: user._id }, { favPosts: newFavList })
 }
 
 // Create comment by user controller
 /**
- *
  * @param {string} postId
- * @param {object} data
- * @param {string} data.comment
  * @param {object} user
- * @param {string} user._id
+ * @param {object} data
  */
-
 export const createPostCommentByUser = async ({ postId, data, user }) => {
   if (user.rol === 'seller') {
-    throw new Error('You can post a comment')
+    throw new Error("you can't post being a seller")
   }
-
   if (!data.comment) {
-    throw new Error('Missing require field')
+    throw new Error('missing require field')
   }
 
   const post = await getPostById(postId)
@@ -376,41 +378,31 @@ export const createPostCommentByUser = async ({ postId, data, user }) => {
     postId: post._id,
     comment: data.comment,
   })
-
   await postComment.save()
 }
 
 // Delete comment by user controller
 /**
- *
  * @param {string} commentId
  * @param {object} user
- * @param {string} user._id
  * @param {'admin' | 'seller' | 'customer'} user.rol
+ * @param {string} user._id
  * @returns {Promise<boolean>}
  */
-
 export const deletePostCommentByUser = async ({ commentId, user }) => {
-  const postcomment = await UserPostComment.findOne({ _id: commentId })
-  if (!postcomment) {
-    throw new Error('Missing require field')
+  const postComment = await UserPostComment.findOne({ _id: commentId })
+  if (!postComment) {
+    throw new Error('comment not found')
   }
 
   if (
-    postcomment.customerId.toString() !== user._id.toString() &&
+    postComment.customerId.toString() !== user._id.toString() &&
     user.rol !== 'admin'
   ) {
-    throw new Error(
-      'This comment can only be deleted by its author or the admin'
-    )
+    throw new Error("you don't have permission")
   }
 
-  await UserPostComment.deleteOne({
-    _id: commentId,
-    customerId: user._id,
-  })
-
-  return true
+  await UserPostComment.deleteOne({ _id: commentId })
 }
 
 //Rating by user controller
@@ -466,7 +458,6 @@ export const addRatingToPostByUser = async ({ postId, data, user }) => {
  * @param {string} data.status
  * @param {object} data.time
  */
-
 export const createPostRequestByUser = async ({ postId, data, user }) => {
   if (!postId || !data.weekDay) {
     throw new Error('Missing some fields')
@@ -502,11 +493,11 @@ export const createPostRequestByUser = async ({ postId, data, user }) => {
   await postRequest.save()
 }
 
-// Función para actualizar el estado de una solicitud de post por parte del vendedor
+// Update request
 /**
  * @param {string} requestId
  * @param {object} data
- * @param {'approved | 'pending' | 'rejected' | 'canceled'} data.status
+ * @param {'approve | 'pending' | 'rejected' | 'canceled'} data.status
  */
 export const updateRequestStatusBySeller = async ({
   data,
